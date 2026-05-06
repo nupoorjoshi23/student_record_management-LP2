@@ -63,11 +63,7 @@ npm run dev
 ```
 Frontend runs on `http://localhost:5173` (proxies API calls to port 5000)
 
-### 3. Seed Sample Data (Optional)
-```bash
-cd backend
-npm run seed
-```
+
 
 ## API Endpoints
 
@@ -86,34 +82,52 @@ npm run seed
 ## 🚀 AWS EC2 Deployment Guide
 
 ### Step 1: Launch EC2 Instance
-- AMI: Ubuntu 22.04 LTS
-- Instance Type: t2.micro (free tier)
-- Security Group: Allow **HTTP (80)**, **HTTPS (443)**, **SSH (22)**, and **Custom TCP 5000**
+1. An active **AWS Account**.
+2. An **EC2 Instance** launched with **Ubuntu Server 22.04 LTS** (or newer).
+3. The `.pem` key pair downloaded to your local machine for SSH access.
+4. **Security Group Configuration**: Ensure the following inbound rules are set in your AWS EC2 Security Group:
+   - **Port 22** (SSH) - From your IP address.
+   - **Port 3000** (Custom TCP) - For the Frontend (or whichever port you choose to serve it on).
+   - **Port 5000** (Custom TCP) - For the Backend API.
 
-### Step 2: SSH into EC2
+## Step 2: Connect to Your EC2 Instance
+
+Open your local terminal, navigate to the folder containing your `.pem` key, and connect to the server:
 ```bash
-ssh -i your-key.pem ubuntu@<EC2_PUBLIC_IP>
+# Set appropriate permissions for your key
+chmod 400 your-key-pair.pem
+
+# Connect to the instance
+ssh -i "your-key-pair.pem" ubuntu@<your-ec2-public-ip>
 ```
 
 ### Step 3: Install Node.js & MongoDB
 ```bash
-# Node.js 18
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# Update package lists
+sudo apt update && sudo apt upgrade -y
 
-# MongoDB
-sudo apt-get install -y gnupg curl
-curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-sudo apt-get update
-sudo apt-get install -y mongodb-org
-sudo systemctl start mongod
-sudo systemctl enable mongod
+# Install curl (if not already installed)
+sudo apt install curl -y
+
+# Download and install Node.js (Version 20.x recommended)
+sudo apt install -y nodejs
+
+sudo apt install npm 
+
+# Verify installation
+node -v
+npm -v
+
+# Install git
+sudo apt install git
+
+# Install PM2 globally to manage background processes
+sudo npm install -g pm2
 ```
 
 ### Step 4: Clone & Setup Project
 ```bash
-git clone <YOUR_REPO_URL> student-records
+git clone <YOUR_REPO_URL>
 cd student-records
 
 # Backend
@@ -127,7 +141,7 @@ Set in `.env`:
 ```
 NODE_ENV=production
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/student_records
+MONGO_URI=your_mongodb_connection_string
 ```
 
 ### Step 5: Build Frontend
@@ -137,19 +151,18 @@ npm install
 npm run build
 ```
 
-### Step 6: Seed Data (Optional)
-```bash
-cd ../backend
-npm run seed
-```
-
 ### Step 7: Run with PM2
 ```bash
 sudo npm install -g pm2
 cd ~/student-records/backend
 pm2 start server.js --name student-records
+
+# Save the current list of PM2 processes
 pm2 save
+
+# Generate the startup script
 pm2 startup
+
 ```
 
 ### Step 8: Access the App
