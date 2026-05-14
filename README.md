@@ -144,7 +144,27 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 ```
 
-### Step 5: Build Frontend
+### Step 5: Update Frontend Configuration
+Before building the frontend, you need to update the Vite configuration to point to your EC2 public IP instead of localhost.
+```
+cd ../frontend
+nano vite.config.js
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// [https://vite.dev/config/](https://vite.dev/config/)
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': 'http://<YOUR_EC2_PUBLIC_IP>:5000',
+    },
+  },
+})
+```
+
+### Step 6: Build Frontend
 ```bash
 cd ../frontend
 npm install
