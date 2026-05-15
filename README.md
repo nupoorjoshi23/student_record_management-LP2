@@ -139,39 +139,18 @@ nano .env
 
 Set in `.env`:
 ```
-NODE_ENV=production
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 ```
-
-### Step 5: Update Frontend Configuration
-Before building the frontend, you need to update the Vite configuration to point to your EC2 public IP instead of localhost.
-```
-cd ../frontend
-nano vite.config.js
-
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-// [https://vite.dev/config/](https://vite.dev/config/)
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://<YOUR_EC2_PUBLIC_IP>:5000',
-    },
-  },
-})
-```
-
-### Step 6: Build Frontend
+### Step 5: Build Frontend
+No IP changes are required in the frontend. The app calls `/api` and the backend serves the build from the same host.
 ```bash
 cd ../frontend
 npm install
 npm run build
 ```
 
-### Step 7: Run with PM2
+### Step 6: Run with PM2
 ```bash
 sudo npm install -g pm2
 cd ~/student-records/backend
@@ -185,7 +164,7 @@ pm2 startup
 
 ```
 
-### Step 8: Access the App
+### Step 7: Access the App
 Open `http://<EC2_PUBLIC_IP>:5000` in your browser.
 
 ---
@@ -194,6 +173,5 @@ Open `http://<EC2_PUBLIC_IP>:5000` in your browser.
 
 | Variable    | Description                    | Default                                      |
 |-------------|--------------------------------|----------------------------------------------|
-| NODE_ENV    | Environment mode               | development                                  |
 | PORT        | Server port                    | 5000                                         |
 | MONGO_URI   | MongoDB connection string      | mongodb://localhost:27017/student_records     |

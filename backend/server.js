@@ -25,20 +25,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Student Records API is running' });
 });
 
-// ---------- Serve Frontend in Production ----------
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React build
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+// ---------- Serve Frontend Build (No fs check) ----------
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
 
-  // Handle React Router — send all non-API requests to index.html
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
+// Serve static files from the React build (if present)
+app.use(express.static(frontendDistPath));
+
+// Handle React Router — send all non-API requests to index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'), (err) => {
+    if (err) {
+      res
+        .status(404)
+        .json({ message: 'Frontend build not found. Run npm run build in frontend.' });
+    }
   });
-} else {
-  app.get('/', (req, res) => {
-    res.json({ message: 'API is running. Frontend is on port 5173.' });
-  });
-}
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
